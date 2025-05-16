@@ -1,6 +1,7 @@
 package com.example.backend.service;
 import com.example.backend.repositories.UserRepository;
 import com.example.backend.entities.User;
+
 import org.springframework.stereotype.Service;
 import java.util.List;
 
