@@ -10,11 +10,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import jakarta.validation.Valid;
 import com.example.backend.entities.Book;
+import com.example.backend.repositories.BookRepository;
 import com.example.backend.service.BookService;
 import com.example.backend.dto.book_dto.CreateBookDto;
 import com.example.backend.dto.book_dto.UpdateBookDto;
@@ -25,10 +29,12 @@ import com.example.backend.dto.book_dto.UpdateBookDto;
 public class bookController {
     
     private final BookService bookService;
+    private final BookRepository bookRepository;
     private final ModelMapper modelMapper;
     
-    public bookController (BookService bookService,ModelMapper modelMapper){
+    public bookController (BookService bookService,BookRepository bookRepository,ModelMapper modelMapper){
         this.bookService = bookService;
+        this.bookRepository= bookRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -48,6 +54,28 @@ public class bookController {
         Map<String,Object> response = new HashMap<>();
         response.put("message", "Book created successfully");
         response.put("book", responseBook);
+        return ResponseEntity.ok(response);
+    }
+
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Map<String, Object>>updateBook(@Valid @RequestBody UpdateBookDto updateBookDto,Long id){
+        Book book = bookRepository.findById(id).get();
+        book.setTitle(updateBookDto.getTitle());
+        book.setDescription(updateBookDto.getDescription());
+        Book updatedBook = bookService.updateBook(updateBookDto,id);
+        UpdateBookDto responseBook = modelMapper.map(updatedBook, UpdateBookDto.class);
+
+        Map<String,Object> response = new HashMap<>();
+        response.put("message", "Book updated successfully");
+        response.put("book", responseBook);
+        return ResponseEntity.ok(response);
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Map<String, Object>>deleteBook(@PathVariable Long id){
+        bookService.removeBook(id);
+        Map<String,Object> response = new HashMap<>();
+        response.put("message", "Book deleted successfully");
         return ResponseEntity.ok(response);
     }
 }
